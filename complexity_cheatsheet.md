@@ -36,14 +36,17 @@
 
 ## Sorting Algorithms
 
-| Algorithm | Best | Average | Worst | Space | Stable? |
-|-----------|------|---------|-------|-------|---------|
-| Python `sort()` | O(N log N) | O(N log N) | O(N log N) | O(N) | ✅ Yes (Timsort) |
-| Merge Sort | O(N log N) | O(N log N) | O(N log N) | O(N) | ✅ Yes |
-| Quick Sort | O(N log N) | O(N log N) | O(N²) | O(log N) | ❌ No |
-| Heap Sort | O(N log N) | O(N log N) | O(N log N) | O(1) | ❌ No |
-| Counting Sort | O(N+K) | O(N+K) | O(N+K) | O(K) | ✅ Yes |
-| Bucket Sort | O(N+K) | O(N+K) | O(N²) | O(N) | ✅ Yes |
+| Algorithm | Best | Average | Worst | Space | Stable? | Notes |
+|-----------|------|---------|-------|-------|---------|-------|
+| Python `sort()` | O(N log N) | O(N log N) | O(N log N) | O(N) | ✅ Yes | Timsort (hybrid merge+insertion) |
+| Bubble Sort | O(N) | O(N²) | O(N²) | O(1) | ✅ Yes | Best case: already sorted |
+| Selection Sort | O(N²) | O(N²) | O(N²) | O(1) | ❌ No | Always N² — never use in practice |
+| Insertion Sort | O(N) | O(N²) | O(N²) | O(1) | ✅ Yes | Fast for nearly-sorted / small N |
+| Merge Sort | O(N log N) | O(N log N) | O(N log N) | O(N) | ✅ Yes | Guaranteed O(N log N), extra space |
+| Quick Sort | O(N log N) | O(N log N) | O(N²) | O(log N) | ❌ No | Worst case on sorted input w/o pivot randomization |
+| Heap Sort | O(N log N) | O(N log N) | O(N log N) | O(1) | ❌ No | In-place, but poor cache performance |
+| Counting Sort | O(N+K) | O(N+K) | O(N+K) | O(K) | ✅ Yes | K = value range; integers only |
+| Radix Sort | O(d×(N+K)) | O(d×(N+K)) | O(d×(N+K)) | O(N+K) | ✅ Yes | d = digits, K = base (10 or 256) |
 
 ---
 
@@ -82,22 +85,45 @@
 ## Python-Specific Complexity Notes
 
 ```python
-# FAST (O(1) average):
-dict[key]           # Hash map lookup
-set.add(x)          # Hash set insert
-list.append(x)      # Amortized O(1)
-deque.appendleft(x) # O(1) — use for BFS!
+# LIST operations
+list.append(x)        # O(1) amortized — fast
+list.pop()            # O(1) — remove from end
+list[i]               # O(1) — index access
+list.insert(0, x)     # O(N) ❌ shifts everything — use deque
+list.pop(0)           # O(N) ❌ shifts everything — use deque.popleft()
+x in list             # O(N) ❌ linear scan — use set
+list.remove(x)        # O(N) ❌ linear scan
+list.sort()           # O(N log N) — Timsort, in-place
+sorted(list)          # O(N log N) — returns new list
 
-# SLOW (O(N)):
-list.insert(0, x)   # Shifts everything — use deque instead
-list.pop(0)         # Shifts everything — use deque.popleft()
-x in list           # Linear scan — use set instead
-list.remove(x)      # Linear scan
+# DICT operations
+dict[key]             # O(1) avg — hash lookup
+dict[key] = val       # O(1) avg — hash insert
+del dict[key]         # O(1) avg — hash delete
+key in dict           # O(1) avg — hash membership
+dict.items()          # O(1) — returns view (not a copy)
 
-# MEDIUM (O(log N)):
-heapq.heappush()    # Heap insert
-heapq.heappop()     # Heap remove min
-bisect.bisect_left() # Binary search in sorted list
+# SET operations
+set.add(x)            # O(1) avg
+set.remove(x)         # O(1) avg
+x in set              # O(1) avg ✅ use instead of `x in list`
+set1 & set2           # O(min(len(s1), len(s2))) — intersection
+set1 | set2           # O(len(s1) + len(s2)) — union
+
+# HEAPQ (min-heap only — negate values for max-heap)
+heapq.heappush(h, x)  # O(log N)
+heapq.heappop(h)      # O(log N) — removes/returns smallest
+heapq.heapify(list)   # O(N) — build heap in-place
+h[0]                  # O(1) — peek min without removing
+heapq.nlargest(k, h)  # O(N log k)
+heapq.nsmallest(k, h) # O(N log k)
+
+# DEQUE (collections.deque — use for BFS queues)
+deque.append(x)       # O(1) — add to right
+deque.appendleft(x)   # O(1) — add to left
+deque.pop()           # O(1) — remove from right
+deque.popleft()       # O(1) ✅ use instead of list.pop(0)
+x in deque            # O(N) — still linear scan
 ```
 
 ---

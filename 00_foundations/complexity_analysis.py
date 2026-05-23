@@ -177,24 +177,151 @@ Where it matters:
 # ============================================================
 
 """
-TEMPLATE for communicating complexity:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6A. THE STANDARD COMPLEXITY EXPLANATION TEMPLATE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-"The time complexity is O(N log N) because:
- - We sort the array first, which takes O(N log N)
- - Then we do a single pass with two pointers, which is O(N)
- - The dominant term is O(N log N)
+Use this structure EVERY time you explain complexity:
 
-The space complexity is O(1) because:
- - We sort in-place
- - We only use two pointer variables"
+  "The time complexity is O(___) because [reason].
+   The space complexity is O(___) because [reason]."
 
-ADVANCED: When asked "can you do better?"
- - If you're at O(N log N) with sorting, ask: "Can I avoid sorting?"
-   → Usually means hash map for O(N)
- - If you're at O(N) time + O(N) space, ask: "Can I reduce space?"
-   → Usually means two pointers or in-place modification for O(1) space
- - If you're at O(N²), ask: "What's repeated work I can cache?"
-   → Usually means hash map, prefix sum, or DP
+FULL EXAMPLE (Sort + Two Pointers):
+  "The time complexity is O(N log N) because:
+   - We sort the array first, which takes O(N log N)
+   - Then we do a single pass with two pointers, which is O(N)
+   - The dominant term is O(N log N), so overall O(N log N)
+
+   The space complexity is O(1) because:
+   - We sort in-place (no extra array)
+   - We only use two pointer variables — constant extra space"
+
+FULL EXAMPLE (Hash Map):
+  "The time complexity is O(N) because:
+   - We make a single pass through the array
+   - Each hash map lookup and insert is O(1) amortized
+   - So N iterations × O(1) each = O(N) total
+
+   The space complexity is O(N) because:
+   - In the worst case, we store all N elements in the hash map"
+
+FULL EXAMPLE (BFS/DFS on Graph):
+  "The time complexity is O(V + E) because:
+   - We visit each vertex exactly once: O(V)
+   - We process each edge exactly once: O(E)
+   - Total work is proportional to vertices plus edges
+
+   The space complexity is O(V) because:
+   - The queue (BFS) or call stack (DFS) holds at most V nodes
+   - The visited set also holds at most V nodes"
+
+FULL EXAMPLE (DP):
+  "The time complexity is O(N × M) because:
+   - We fill an N × M DP table
+   - Each cell takes O(1) to compute
+   - Total: N × M cells × O(1) = O(N × M)
+
+   The space complexity is O(N × M) for the DP table,
+   or O(min(N, M)) if we optimize to use only two rows."
+
+FULL EXAMPLE (Backtracking / Subsets):
+  "The time complexity is O(2^N × N) because:
+   - There are 2^N possible subsets
+   - Each subset takes O(N) to copy into the result
+   - Total: O(2^N × N)
+
+   The space complexity is O(N) for the recursion call stack depth,
+   not counting the output."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6B. PRE-CODING COMPLEXITY ANNOUNCEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before writing code, state your expected complexity:
+
+  "Before I code this up — I expect this approach to be
+   O(N log N) time and O(1) space. Let me know if you'd
+   like me to aim for something better before I start."
+
+This signals:
+  ✅ You know the complexity before coding (not after)
+  ✅ You're giving the interviewer a chance to redirect
+  ✅ You're thinking about tradeoffs, not just correctness
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6C. RESPONDING TO "CAN YOU DO BETTER?"
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Don't panic. Use this decision tree:
+
+  Currently O(N²)?
+    → "The repeated work is [X]. I can cache it with a hash map → O(N)"
+    → "I can sort first and use two pointers → O(N log N)"
+
+  Currently O(N log N) with sorting?
+    → "If I can avoid sorting, I can use a hash map → O(N)"
+    → "The sort is the bottleneck. Without it, the rest is O(N)."
+
+  Currently O(N) time + O(N) space?
+    → "I can trade space for time using two pointers → O(1) space"
+    → "The hash map is for O(1) lookup. Without it, I'd need O(N log N) time."
+
+  Currently O(2^N)?
+    → "This is inherently exponential — we must enumerate all subsets."
+    → "With memoization, I can reduce overlapping subproblems → O(N × states)"
+
+  Script for "can you do better?":
+    "Let me think about what's driving the current complexity...
+     [pause 5 seconds]
+     The bottleneck is [X]. If I [change Y], I could get to [better complexity].
+     The tradeoff is [Z]. Want me to implement that instead?"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6D. COMMON INTERVIEWER FOLLOW-UP QUESTIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Q: "What's the time complexity of your solution?"
+A: Use Template 6A above. Always break it down step by step.
+
+Q: "What about space complexity?"
+A: "The space complexity is O(___). This accounts for [extra data structures].
+    I'm not counting the input itself, only the extra memory I allocate."
+
+Q: "Is this optimal?"
+A: "For comparison-based sorting, O(N log N) is the theoretical lower bound.
+    For this problem, O(N) is achievable with a hash map because [reason]."
+    — OR —
+    "I believe O(N) is optimal here because we must read every element at least once."
+
+Q: "What if N is very large — say 10^9?"
+A: "At 10^9, even O(N) would be ~10 seconds in Python. I'd need O(log N) or O(1).
+    That suggests binary search or a mathematical formula."
+
+Q: "What's the worst case vs average case?"
+A: "The worst case is O(N²) — for example, a sorted array with a bad pivot in quicksort.
+    The average case is O(N log N) with random pivot selection.
+    For interviews, I always state worst case unless asked otherwise."
+
+Q: "Does your solution handle the constraints?"
+A: "The constraint is N ≤ 10^5. My solution is O(N log N) ≈ 10^5 × 17 ≈ 1.7 × 10^6
+    operations. Well within the ~10^8 ops/second limit. ✅"
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6E. CONSTRAINT → COMPLEXITY CHEAT SHEET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Use this to instantly know what complexity is REQUIRED:
+
+  N ≤ 10        → O(N!) or O(2^N) is fine   → Brute force / backtracking
+  N ≤ 20        → O(2^N) is fine             → Bitmask DP, subsets
+  N ≤ 100       → O(N³) is fine              → Floyd-Warshall, 3-nested loops
+  N ≤ 1,000     → O(N²) is fine              → Brute force pairs, O(N²) DP
+  N ≤ 10^5      → O(N log N) required        → Sort + linear, heap, binary search
+  N ≤ 10^6      → O(N) required              → Single pass, hash map
+  N ≤ 10^9      → O(log N) or O(1) required  → Binary search, math formula
+
+  Script: "The constraint is N ≤ [X], which tells me I need at most O([Y]).
+           My approach is O([Z]), which fits within that budget."
 """
 
 
