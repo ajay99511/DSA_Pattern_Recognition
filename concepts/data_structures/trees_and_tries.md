@@ -1,90 +1,108 @@
-# Trees & Tries
+# Trees & Tries: Hierarchical Architecture
 
-## 1. Binary Trees & BSTs
+## 1. Binary Search Trees (BST) & Balancing
 
-### Conceptual Overview
-A **Tree** is a hierarchical data structure. A **Binary Tree** is a tree where each node has at most two children (Left and Right).
-A **Binary Search Tree (BST)** adds a rule: `Left < Parent < Right`.
+### Schematic: AVL Rotations (Restoring Balance)
+A BST becomes inefficient ($O(n)$) if it becomes skewed. **AVL Trees** use rotations to maintain $O(\log n)$ height.
 
-### Visual Representation
 ```mermaid
 graph TD
-    Root((8)) --> L((3))
-    Root --> R((10))
-    L --> LL((1))
-    L --> LR((6))
-    R --> RR((14))
-    LR --> LRL((4))
-    LR --> LRR((7))
+    subgraph Right_Rotation [Left-Left Case]
+    direction TB
+    C((C)) --> B((B))
+    B --> A((A))
     
-    style Root fill:#f9f,stroke:#333,stroke-width:4px
+    B_Rotate[Rotate B Right]
+    
+    B1((B)) --> A1((A))
+    B1 --> C1((C))
+    end
+    
+    C -.-> B_Rotate -.-> B1
+    
+    style B1 fill:#6f9
 ```
 
-### Complexity (BST)
-| Operation | Average | Worst (Skewed) |
+---
+
+## 2. Heaps: The Array-Based Tree
+
+### Conceptual Overview
+Heaps are **Complete Binary Trees** stored in an **Array**.
+- Parent of $i$: `(i-1) // 2`
+- Children of $i$: `2i + 1`, `2i + 2`
+
+### Schematic: Heapify (Sift-Up / Sift-Down)
+When inserting into a **Max-Heap**, we add to the end and "Sift-Up".
+
+```mermaid
+graph TD
+    subgraph Sift_Up [Insert 50 into Max-Heap]
+    Root((40)) --> L((30))
+    Root --> R((20))
+    L --> LL((10))
+    L --> New((50))
+    
+    Swap[Swap 50 with 30, then with 40]
+    
+    Final_Root((50)) --> Final_L((40))
+    Final_Root --> Final_R((20))
+    Final_L --> F_LL((10))
+    Final_L --> F_New((30))
+    end
+    
+    New -.-> Swap -.-> Final_Root
+    
+    style New fill:#f9f
+    style Final_Root fill:#6f9
+```
+
+---
+
+## 3. Tries: The Prefix Schematic
+
+### Schematic: Storing "CAT" and "CAR"
+```mermaid
+graph TD
+    Root(( )) --> C((c))
+    C --> A((a))
+    A --> T((t*))
+    A --> R((r*))
+    
+    style T fill:#dfd
+    style R fill:#dfd
+```
+**Space Efficiency**: Common prefixes are shared, making Tries ideal for dictionary lookups.
+
+---
+
+## 4. Tree Traversals: The Three Perspectives
+
+### A. Depth-First Search (DFS)
+- **In-Order (L-Root-R)**: Sorted order for BSTs.
+- **Pre-Order (Root-L-R)**: Good for cloning trees.
+- **Post-Order (L-R-Root)**: Bottom-up processing (e.g., subtree size).
+
+### B. Breadth-First Search (BFS / Level-Order)
+Visits nodes layer by layer using a **Queue**.
+
+### C. Iterative vs. Recursive
+- **Recursive**: Simple to write, uses the **Stack** (can lead to StackOverflow for deep trees).
+- **Iterative**: Uses an explicit **Stack** or **Queue**, safer for massive trees.
+
+---
+
+## 5. Developer Cheat Sheet
+
+| Tree Type | Key Property | Use Case |
 | :--- | :--- | :--- |
-| **Search** | O(log n) | O(n) |
-| **Insert** | O(log n) | O(n) |
-| **Delete** | O(log n) | O(n) |
+| **BST** | Sorted order | General searching |
+| **Heap** | Min/Max at root | Priority Queues, Top-K problems |
+| **AVL / Red-Black** | Self-balancing | `std::map` (C++), `TreeMap` (Java) |
+| **Segment Tree** | Range queries | Sum/Min in a range |
+| **Trie** | Prefix sharing | Autocomplete, IP routing |
 
----
-
-## 2. Heaps (Priority Queues)
-
-### Conceptual Overview
-A **Heap** is a special Tree-based data structure that satisfies the **Heap Property**:
-- **Max-Heap**: Parent is always $\ge$ children. (Root is the maximum).
-- **Min-Heap**: Parent is always $\le$ children. (Root is the minimum).
-
-### Memory Trick: Array Implementation
-Heaps are almost always implemented using an **Array**, not nodes and pointers. For an index $i$:
-- `Left Child`: $2i + 1$
-- `Right Child`: $2i + 2$
-- `Parent`: $(i-1) // 2$
-
----
-
-## 3. Tries (Prefix Trees)
-
-### Conceptual Overview
-A **Trie** is used for efficient string retrieval. Each node represents a character.
-**Use Case**: Autocomplete, Spell checkers, IP routing.
-
-### Visual Representation
-```mermaid
-graph TD
-    Root(( )) --> A((a))
-    Root --> B((b))
-    A --> AN((n))
-    AN --> ANT((t))
-    B --> BA((a))
-    BA --> BAT((t))
-    BA --> BAD((d))
-    
-    style ANT fill:#6f9
-    style BAT fill:#6f9
-    style BAD fill:#6f9
-```
-
----
-
-## 4. Advanced Tree Concepts
-
-### Balanced Trees (AVL, Red-Black)
-Standard BSTs can become "skewed" (like a linked list), making operations O(n). Balanced trees use **rotations** to maintain O(log n) height.
-
-### Segment Trees & Fenwick Trees
-Used for **Range Queries** (e.g., sum of elements from index $i$ to $j$) and **Point Updates** in O(log n) time.
-
----
-
-## 5. Developer Tips
-
-### Recursion is King
-Most tree problems are solved recursively. If you are stuck, think: "What if I solve it for the left child and right child, then combine the results?"
-
-### Traversal Patterns
-- **In-order (L-Root-R)**: Gives elements in sorted order for a BST.
-- **Pre-order (Root-L-R)**: Used to clone a tree.
-- **Post-order (L-R-Root)**: Used to delete a tree or calculate subtree properties (like height/diameter).
-- **Level-order (BFS)**: Uses a Queue to visit nodes layer by layer.
+### Critical Patterns
+- **LCA (Lowest Common Ancestor)**: Find the first common parent.
+- **Path Sum**: Tracking state down a branch.
+- **Diameter of Tree**: Longest path between any two nodes.

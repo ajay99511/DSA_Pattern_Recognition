@@ -1,80 +1,131 @@
-# Arrays & Hashing
+# Arrays & Hashing: Architectural Deep Dive
 
-## 1. Arrays (The Foundation)
+## 1. The Physical Layer: Memory Layout
 
-### Conceptual Overview
-An **Array** is a collection of items stored at contiguous memory locations. Think of it like a row of lockers in a school hallway. Each locker has a fixed size, and they are all right next to each other.
+### Schematic: Contiguous Memory vs. Sparse Access
+An array is a promise of **Cache Locality**. The CPU doesn't just fetch one element; it fetches a "Cache Line" containing neighbors.
 
-### Visual Representation
 ```mermaid
 graph LR
-    subgraph Array Memory Layout
-    A[Index 0] --- B[Index 1] --- C[Index 2] --- D[Index 3] --- E[Index 4]
-    val0[Value: 10] -.-> A
-    val1[Value: 20] -.-> B
-    val2[Value: 30] -.-> C
-    val3[Value: 40] -.-> D
-    val4[Value: 50] -.-> E
+    subgraph RAM [Physical RAM Layout]
+    direction LR
+    M1[0x00: Val 10] --- M2[0x04: Val 20] --- M3[0x08: Val 30] --- M4[0x0C: Val 40]
+    M4 --- M5[0x10: Empty] --- M6[0x14: Empty]
     end
-    style A fill:#f9f,stroke:#333,stroke-width:2px
-    style B fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#f9f,stroke:#333,stroke-width:2px
+    
+    subgraph CPU_Cache [L1/L2 Cache Line]
+    C1[Val 10] --- C2[Val 20] --- C3[Val 30] --- C4[Val 40]
+    end
+    
+    RAM -- "Prefetch Line" --> CPU_Cache
+    
+    style M1 fill:#f9f,stroke:#333
+    style M2 fill:#f9f,stroke:#333
+    style M3 fill:#f9f,stroke:#333
+    style M4 fill:#f9f,stroke:#333
+    style CPU_Cache fill:#dfd,stroke:#090,stroke-dasharray: 5 5
 ```
-
-### Key Properties
-- **Random Access**: O(1) time to access any element if you know the index.
-- **Contiguous Memory**: Elements are stored back-to-back, which is cache-friendly.
-- **Fixed vs. Dynamic**: Static arrays have fixed size; Dynamic arrays (like Python Lists or JS Arrays) resize automatically.
 
 ---
 
-## 2. Hash Tables (The Powerhouse)
+## 2. Dynamic Arrays: The Resizing Mechanic
 
 ### Conceptual Overview
-A **Hash Table** (or Hash Map) is a data structure that maps keys to values. Think of it like a library's filing cabinet. You give the librarian a book title (key), they run it through a system (hash function) to get a drawer number (index), and they find the book (value) there.
+When a dynamic array (like `std::vector` or Python `list`) exceeds its **Capacity**, it performs an "Amortized" operation:
+1. Allocates a new block of memory (usually **2x** the size).
+2. Copies all elements to the new block.
+3. Frees the old block.
 
-### Visual Representation
+### Schematic: The Double-and-Copy Strategy
 ```mermaid
 graph TD
-    Key[Key: 'username'] --> HF[Hash Function]
-    HF --> Index[Index: 42]
-    subgraph Hash Table Buckets
-    B0[Bucket 0]
-    B1[...]
-    B42[Bucket 42: {'username': 'ajay'}]
-    BN[Bucket N]
+    subgraph Step1 [1. Capacity Full]
+    A1[1] --- A2[2] --- A3[3] --- A4[4]
     end
-    Index --> B42
+    
+    subgraph Step2 [2. Allocate & Copy]
+    B1[1] --- B2[2] --- B3[3] --- B4[4] --- B5[ ] --- B6[ ] --- B7[ ] --- B8[ ]
+    A1 -.-> B1
+    A2 -.-> B2
+    A3 -.-> B3
+    A4 -.-> B4
+    end
+    
+    subgraph Step3 [3. Final State]
+    C1[1] --- C2[2] --- C3[3] --- C4[4] --- C5[NEW] --- C6[ ] --- C7[ ] --- C8[ ]
+    end
+    
+    style A1 fill:#f66
+    style A4 fill:#f66
+    style C5 fill:#6f9
 ```
-
-### The Magic: Hashing & Collisions
-- **Hash Function**: Turns a key into a numeric index. A good function distributes keys uniformly.
-- **Collisions**: When two keys hash to the same index.
-    - **Chaining**: Each bucket is a Linked List.
-    - **Open Addressing**: Find the next available slot.
 
 ---
 
-## 3. Developer Tips & Practical Knowledge
+## 3. Hash Tables: The Collision Battlefield
 
-### Why Contiguous Memory Matters (Cache Locality)
-Modern CPUs use caches (L1, L2, L3). When you access an array element, the CPU fetches a "cache line" (usually 64 bytes). This means it fetches the next few elements too! This makes array iteration incredibly fast compared to Linked Lists.
+### Schematic: Collision Resolution (Chaining vs Open Addressing)
 
-### Hash Table Load Factor
-When a Hash Table gets too full (usually > 70%), "collisions" increase, and performance degrades from O(1) to O(n). Most languages handle resizing automatically by doubling the capacity.
+#### A. Separate Chaining (Linked Lists)
+```mermaid
+graph LR
+    subgraph Buckets
+    B0[Index 0]
+    B1[Index 1]
+    B2[Index 2]
+    end
+    
+    B0 --> N1[Key: 'Alice'] --> N2[Key: 'Zoe']
+    B2 --> N3[Key: 'Bob']
+    
+    style N2 fill:#ffd,stroke:#333
+    style B0 fill:#eee
+```
 
-### Complexity Table
+#### B. Open Addressing (Linear Probing)
+```mermaid
+graph LR
+    subgraph Array_Slots
+    S0[Alice]
+    S1[Zoe - Collided & Moved]
+    S2[Bob]
+    S3[Empty]
+    end
+    
+    HashZoe['Zoe' hashes to 0] -.-> S0
+    S0 -- "Slot Taken" --> S1
+    
+    style S1 fill:#f96,stroke:#333
+```
 
-| Operation | Array (Static) | Array (Dynamic) | Hash Table (Avg) | Hash Table (Worst) |
-| :--- | :--- | :--- | :--- | :--- |
-| **Access** | O(1) | O(1) | N/A | N/A |
-| **Search** | O(n) | O(n) | O(1) | O(n) |
-| **Insertion**| O(n) | O(1)* | O(1) | O(n) |
-| **Deletion** | O(n) | O(n) | O(1) | O(n) |
+---
 
-*\*Amortized O(1) for Dynamic Array insertion at the end.*
+## 4. Advanced Sub-Topics & Nuances
 
-### Common Patterns
-- **Frequency Map**: Using a hash map to count occurrences.
-- **Two Sum Pattern**: Using a hash map to store seen values and check for complements in O(1).
-- **Prefix Sum**: Pre-calculating sums to answer range queries in O(1).
+### Hash Functions: The "Uniform Distribution" Goal
+A high-quality hash function must:
+1. **Deterministic**: Same input $\rightarrow$ Same output.
+2. **Fast**: O(1) time to compute.
+3. **Minimize Collisions**: Spread keys across the entire table.
+
+### Load Factor ($\alpha$)
+$\alpha = \frac{n}{k}$ where $n$ is the number of entries and $k$ is the number of buckets.
+- **Threshold**: Usually 0.7 to 0.75.
+- **When $\alpha > Threshold$**: Performance drops from $O(1)$ toward $O(n)$. The table **must** resize (rehash).
+
+---
+
+## 5. Developer Cheat Sheet
+
+| Feature | Static Array | Dynamic Array | Hash Map |
+| :--- | :--- | :--- | :--- |
+| **Search (Key)** | O(n) | O(n) | **O(1) Avg** / O(n) Worst |
+| **Access (Index)** | **O(1)** | **O(1)** | N/A |
+| **Insert (End)** | O(1) / N/A | **O(1) Amortized** | **O(1) Avg** |
+| **Memory** | Fixed | Dynamic (Over-allocated) | Large Overhead |
+
+### Critical Patterns
+- **Prefix Sums**: Range queries in $O(1)$.
+- **Two Pointers**: Collapsing search space.
+- **Sliding Window**: Dynamic range processing.
+- **Difference Array**: Batch updates to ranges.

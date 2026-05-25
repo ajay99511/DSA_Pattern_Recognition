@@ -1,78 +1,102 @@
-# Stacks & Queues
+# Stacks & Queues: Strategic Data Structures
 
-## 1. Stack (LIFO - Last In, First Out)
+## 1. Stack: The LIFO Powerhouse
 
-### Conceptual Overview
-A **Stack** is a linear data structure that follows the LIFO principle.
-**Analogy**: A stack of plates in a cafeteria. You add a new plate to the top, and you take the top plate off first.
+### Schematic: The Function Call Stack
+Modern programming depends on the stack for recursion and function calls.
 
-### Visual Representation
 ```mermaid
 graph BT
-    subgraph Stack
-    Top[Top] --> E3[Element 3]
-    E3 --> E2[Element 2]
-    E2 --> E1[Element 1]
-    E1 --> Bottom[Bottom]
+    subgraph RAM_Stack [Memory Stack Frame]
+    direction BT
+    F1[main()] --- F2[getUser()] --- F3[dbQuery()]
     end
-    style Top fill:#f96,stroke:#333
+    
+    subgraph CPU_Ops [Stack Operations]
+    Push((Push)) -.-> F3
+    F3 -.-> Pop((Pop))
+    end
+    
+    style F3 fill:#f96,stroke:#333
+    style RAM_Stack fill:#f0f0f0
 ```
-
-### Key Operations
-- **Push**: Add an item to the top. O(1)
-- **Pop**: Remove the top item. O(1)
-- **Peek/Top**: View the top item without removing it. O(1)
 
 ---
 
-## 2. Queue (FIFO - First In, First Out)
+## 2. Queue: The FIFO Pipeline
+
+### Schematic: Circular Queue (Optimized Memory)
+In a static array, a standard queue eventually runs out of space at the back even if the front is empty. A **Circular Queue** wraps around.
+
+```mermaid
+graph TD
+    subgraph Circular_Memory [The Modulo Loop]
+    direction TB
+    S0[Data 0] --- S1[Data 1] --- S2[Data 2] --- S3[Head] --- S4[Data 4] --- S5[Tail] --- S6[Empty] --- S7[Empty]
+    S7 --- S0
+    end
+    
+    Head_Ptr[Head Index] -.-> S3
+    Tail_Ptr[Tail Index] -.-> S5
+    
+    style S3 fill:#6f9
+    style S5 fill:#f66
+```
+**Formula**: `(index + 1) % capacity`
+
+---
+
+## 3. The Interview Killer: Monotonic Stack
 
 ### Conceptual Overview
-A **Queue** follows the FIFO principle.
-**Analogy**: A line of people waiting for coffee. The first person in line is the first one served.
+A stack where elements are kept in a specific order (always increasing or always decreasing). When a new element breaks the order, we "pop" until the order is restored.
 
-### Visual Representation
+### Schematic: Next Greater Element
+Problem: Find the first element to the right that is larger than the current.
+
 ```mermaid
 graph LR
-    subgraph Queue
-    Rear[Rear/Tail] --> E3[Element 3]
-    E3 --> E2[Element 2]
-    E2 --> E1[Element 1]
-    E1 --> Front[Front/Head]
+    subgraph Input_Array
+    direction LR
+    A1[2] --- A2[1] --- A3[5] --- A4[3]
     end
-    style Front fill:#6f9,stroke:#333
-    style Rear fill:#f69,stroke:#333
+    
+    subgraph Stack_State [Monotonic Decreasing Stack]
+    S1[Index 1: Val 1]
+    S2[Index 0: Val 2]
+    end
+    
+    NewVal[Val 5 arrives] -- "5 > 1 & 5 > 2" --> PopAll[Pop 1 and 2]
+    PopAll -- "Mark Answer" --> Result[Result for 1 & 2 is 5]
+    
+    style S1 fill:#f9f
+    style NewVal fill:#6f9
 ```
 
-### Key Operations
-- **Enqueue**: Add an item to the back. O(1)
-- **Dequeue**: Remove an item from the front. O(1)
-- **Front/Peek**: View the front item. O(1)
+**Complexity**: $O(n)$ total (each element is pushed and popped exactly once).
 
 ---
 
-## 3. Advanced Variants
+## 4. Advanced Sub-Topics
 
 ### Deque (Double-Ended Queue)
-Pronounced "deck". Allows insertion and deletion from both the front and the back. It's the most flexible linear structure.
+Implemented typically as a **Doubly Linked List** or a **Circular Dynamic Array**.
+- **Use Case**: Sliding Window Maximum problem ($O(n)$ solution).
 
-### Priority Queue
-Elements are removed based on **priority**, not just arrival time. Usually implemented with a **Heap**.
+### Priority Queue vs. Standard Queue
+A Priority Queue is NOT a queue in the traditional sense; it's a **Heap**. Use it when you need to "process the most important item first" rather than "first come, first served".
 
 ---
 
-## 4. Developer Tips & Practical Knowledge
+## 5. Developer Cheat Sheet
 
-### Common Patterns
-- **Monotonic Stack**: A stack where elements are always in increasing or decreasing order. Used to find the "next greater element".
-- **BFS (Breadth-First Search)**: Uses a **Queue** to explore nodes layer by layer.
-- **DFS (Depth-First Search)**: Uses a **Stack** (explicitly or via the recursion call stack).
+| Data Structure | Best Implementation | Primary Use Case |
+| :--- | :--- | :--- |
+| **Stack** | Dynamic Array (`ArrayList`) | DFS, Undo, Expression Parsing |
+| **Queue** | Linked List (`LinkedList`) | BFS, Task Scheduling |
+| **Deque** | `ArrayDeque` (Java) / `collections.deque` (Py) | Sliding Windows |
 
-### Implementation Choice
-- **Array-based**: Faster access, but limited by capacity (or resizing cost).
-- **Linked-List-based**: Truly dynamic, but higher memory overhead and no cache locality.
-
-### Real-world use cases
-- **Stack**: Undo/Redo operations, Expression parsing (compilers), Backtracking.
-- **Queue**: Task scheduling (OS), Print queues, Breadth-First Search.
-- **Priority Queue**: Dijkstra's algorithm, Huffman coding.
+### Critical Patterns
+- **Monotonic Stack**: For range-based comparisons (Next Greater/Smaller).
+- **Two Stacks = Queue**: Classic design problem.
+- **BFS with Queue**: Layer-by-layer traversal.

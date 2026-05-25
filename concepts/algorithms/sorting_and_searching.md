@@ -1,79 +1,92 @@
-# Sorting & Searching
+# Sorting & Searching: The Efficiency Core
 
-## 1. Searching Algorithms
+## 1. Binary Search: The "Range Reduction" Schematic
+Binary Search isn't just for finding a value; it's for **Search Space Reduction**.
 
-### Binary Search (The Gold Standard)
-**Conceptual Overview**: A "divide and conquer" search algorithm. It works on **sorted arrays** by repeatedly dividing the search interval in half.
-
-**Visual Representation**
+### Schematic: The `[Left, Right]` Collapse
 ```mermaid
-graph TD
-    A[1, 3, 5, 7, 9, 11, 13] --> B{Mid: 7}
-    B -- Target > 7 --> C[9, 11, 13]
-    B -- Target < 7 --> D[1, 3, 5]
-    C --> E{Mid: 11}
-    D --> F{Mid: 3}
+graph LR
+    subgraph Iteration_1 [Range: 0-100]
+    direction LR
+    L1[0] --- M1{50} --- R1[100]
+    end
+    
+    subgraph Iteration_2 [Target > 50]
+    direction LR
+    L2[51] --- M2{75} --- R2[100]
+    end
+    
+    Iteration_1 -- "low = mid + 1" --> Iteration_2
+    style M1 fill:#f9f
+    style M2 fill:#6f9
 ```
 
-**Complexity**: O(log n)
+**Developer Tip**: Use `low + (high - low) // 2` to avoid integer overflow in languages like C++/Java.
 
 ---
 
-## 2. Sorting Algorithms (The Big Three)
+## 2. QuickSort: The Partitioning Logic
 
-### A. Merge Sort (Stable & Reliable)
-**Conceptual Overview**: Recursively split the array in half until you have single elements, then merge them back in sorted order.
+### Conceptual Overview
+The heart of QuickSort is the **Partition** step. We pick a pivot and move everything smaller to the left and larger to the right.
 
-**Visual Representation**
+### Schematic: Lomuto Partitioning
 ```mermaid
 graph TD
-    Split[Divide] --> S1[Left Half]
-    Split --> S2[Right Half]
-    S1 --> M[Sort & Merge]
-    S2 --> M
-    M --> Final[Sorted Array]
+    subgraph State_1 [Array with Pivot: 5]
+    A1[2] --- A2[8] --- A3[3] --- A4[9] --- A5[1] --- A6[Pivot: 5]
+    end
+    
+    subgraph State_2 [Processing 1]
+    B1[2] --- B2[3] --- B3[1] --- B4[9] --- B5[8] --- B6[Pivot: 5]
+    end
+    
+    subgraph State_3 [Final Swap]
+    C1[2] --- C2[3] --- C3[1] --- C4[Pivot: 5] --- C5[8] --- C6[9]
+    end
+    
+    State_1 --> State_2 --> State_3
+    style C4 fill:#6f9
 ```
-- **Complexity**: O(n log n) always.
-- **Space**: O(n) (requires extra space for merging).
-
-### B. Quick Sort (The Fastest in Practice)
-**Conceptual Overview**: Pick a "pivot" element. Partition the array so elements < pivot are on the left, and elements > pivot are on the right. Recurse.
-
-- **Complexity**: O(n log n) average, O(n²) worst case (if pivot is poorly chosen).
-- **Space**: O(log n) (recursion stack).
-
-### C. Heap Sort (O(1) Space)
-**Conceptual Overview**: Build a Max-Heap from the array. Repeatedly extract the maximum element (root) and move it to the end of the array.
-
-- **Complexity**: O(n log n) always.
-- **Space**: O(1) (in-place).
 
 ---
 
-## 3. Comparison Table
+## 3. Stability & In-Place Algorithms
 
-| Algorithm | Best | Average | Worst | Space | Stable? |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Merge Sort** | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes |
-| **Quick Sort** | O(n log n) | O(n log n) | O(n²) | O(log n) | No |
-| **Heap Sort** | O(n log n) | O(n log n) | O(n log n) | O(1) | No |
-| **Insertion Sort**| O(n) | O(n²) | O(n²) | O(1) | Yes |
+### A. Sorting Stability
+A sort is **Stable** if it preserves the relative order of elements with equal keys.
+- **Stable**: Merge Sort, Insertion Sort, Bubble Sort.
+- **Unstable**: QuickSort, Heap Sort, Selection Sort.
+
+### B. In-Place Algorithms
+An algorithm is **In-Place** if it uses only $O(1)$ extra space (excluding the recursion stack).
+- **In-Place**: QuickSort, Heap Sort, Insertion Sort.
+- **Not In-Place**: Merge Sort (requires $O(n)$ extra space).
 
 ---
 
-## 4. Developer Tips & Real-World Usage
+## 4. Advanced Sub-Topics
 
-### Timsort: The Real World Secret
-Most modern languages (Python, Java, JS) don't use pure Merge or Quick sort. They use **Timsort**, a hybrid of Merge Sort and Insertion Sort designed to perform well on real-world data (which is often already partially sorted).
+### Counting Sort & Radix Sort
+Non-comparison based sorting that can achieve **O(n)** time.
+- **Requirement**: The data must be integers within a specific range.
 
-### When to use which?
-- **Small datasets**: **Insertion Sort** is often faster due to low overhead.
-- **Memory is tight**: **Heap Sort** (O(1) space).
-- **Stability matters**: **Merge Sort** (e.g., sorting a list of students by name, then by grade).
-- **General purpose**: **Quick Sort** (usually the fastest average-case performance).
+### Search Space Binary Search
+Applying binary search on the **Answer** instead of the input array.
+- **Example**: "Minimum time to complete all tasks" where you binary search between `min_time` and `max_time`.
 
-### Binary Search "Templates"
-Don't just search for a value. Binary search can be used for:
-- **Leftmost/Rightmost element** in a range of duplicates.
-- **"Square root"** of a number.
-- **Smallest value that satisfies a condition** (Search Space reduction).
+---
+
+## 5. Developer Cheat Sheet
+
+| Algorithm | Average Time | Space | Stable? | When to use? |
+| :--- | :--- | :--- | :--- | :--- |
+| **QuickSort** | $O(n \log n)$ | $O(\log n)$ | No | General purpose, fast in-place |
+| **MergeSort** | $O(n \log n)$ | $O(n)$ | **Yes** | Linked lists, Stability needed |
+| **HeapSort** | $O(n \log n)$ | **O(1)** | No | Limited memory |
+| **Timsort** | $O(n \log n)$ | $O(n)$ | **Yes** | Most real-world data (Hybrid) |
+
+### Critical Patterns
+- **Median of Three**: Improving QuickSort pivot selection.
+- **Kth Largest Element**: Using QuickSelect (average $O(n)$).
+- **Binary Search on Answer**: Solving optimization problems.

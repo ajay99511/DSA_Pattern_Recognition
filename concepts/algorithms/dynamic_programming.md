@@ -1,81 +1,95 @@
-# Dynamic Programming (DP)
+# Dynamic Programming: The Art of Storing State
 
-## 1. Conceptual Overview
-**Dynamic Programming** is an optimization over plain recursion. It involves breaking a complex problem into smaller subproblems, solving each once, and storing their results.
+## 1. Space Optimization: The "Sliding Variable" Schematic
+In many DP problems, you don't need the entire $O(n)$ table. You only need the previous 1 or 2 states.
 
-**The Two Requirements**:
-1. **Overlapping Subproblems**: The same subproblems are solved multiple times.
-2. **Optimal Substructure**: The optimal solution to the problem can be built from the optimal solutions of its subproblems.
-
----
-
-## 2. The DP Workflow: From Zero to Hero
-
-### Step 1: Recursive Solution (Top-Down)
-Start with a naive recursive solution.
-- **Complexity**: Usually exponential (O(2ⁿ)).
-
-### Step 2: Memoization (Top-Down + Cache)
-Store the results of expensive function calls in a Hash Map or Array.
-- **Complexity**: Drastically reduced to polynomial (often O(n)).
-
-### Step 3: Tabulation (Bottom-Up)
-Solve the smallest subproblems first and build up to the target using an iterative table.
-- **Space Optimization**: Often, you only need the previous 1 or 2 results, allowing you to reduce space from O(n) to O(1).
-
----
-
-## 3. Visual Representation: Fibonacci Example
-
+### Schematic: Fibonacci Optimization
 ```mermaid
-graph TD
-    subgraph Recursion Tree (Naive)
-    F5((F5)) --> F4((F4))
-    F5 --> F3((F3))
-    F4 --> F3_((F3))
-    F4 --> F2((F2))
-    F3 --> F2_((F2))
-    F3 --> F1((F1))
+graph LR
+    subgraph Iteration_N [Calculate F(n)]
+    P1[Prev2] --- P2[Prev1] --- C[Current]
     end
     
-    style F3_ fill:#f96,stroke:#333
-    style F3 fill:#f96,stroke:#333
-    style F2 fill:#6f9
-    style F2_ fill:#6f9
+    subgraph Iteration_N1 [Calculate F(n+1)]
+    NP1[Prev1] --- NP2[Current] --- NC[New Current]
+    end
+    
+    Iteration_N -- "Shift Pointers" --> Iteration_N1
+    
+    style C fill:#f9f
+    style NC fill:#6f9
 ```
-*In DP, the orange nodes are calculated only once.*
+**Result**: Space reduced from $O(n)$ to $O(1)$.
 
 ---
 
-## 4. Common DP Patterns
+## 2. DP on Grids: The "Flow" Schematic
 
-### 1. 0/1 Knapsack
-- **Problem**: You have items with weights and values. Find the max value you can carry in a bag of capacity $W$.
-- **Logic**: For each item, you either **Take** it or **Leave** it.
+### Conceptual Overview
+Finding the "Minimum Path Sum" from $(0,0)$ to $(n,m)$. You can only move Right or Down.
 
-### 2. Unbounded Knapsack
-- Similar to 0/1, but you can take multiple instances of the same item (e.g., Coin Change problem).
-
-### 3. Longest Common Subsequence (LCS)
-- Find the longest sequence that appears in both strings in the same relative order.
-- **Use Case**: `git diff`, Bioinformatics.
-
-### 4. Matrix Chain Multiplication / Interval DP
-- Optimal way to multiply matrices or solve problems on a range $[i, j]$.
+### Schematic: Transition Logic
+```mermaid
+graph TD
+    subgraph Matrix
+    direction TB
+    C1[Target: i, j]
+    C2[From Top: i-1, j]
+    C3[From Left: i, j-1]
+    
+    C2 --> C1
+    C3 --> C1
+    end
+    
+    Logic["dp[i][j] = val[i][j] + min(dp[i-1][j], dp[i][j-1])"]
+    
+    style C1 fill:#6f9
+```
 
 ---
 
-## 5. Developer Tips & Practical Knowledge
+## 3. String DP: Longest Common Subsequence (LCS)
 
-### The "State" and "Transition"
-DP is all about two things:
-1. **State**: What variables uniquely identify a subproblem? (e.g., `dp[i]` is the max profit up to index $i$).
-2. **Transition**: How do I compute `dp[i]` from `dp[i-1]`, `dp[i-2]`, etc.?
+### Schematic: State Transition Matrix
+```mermaid
+graph TD
+    subgraph Matrix_LCS [String A: 'ABC', String B: 'ACE']
+    direction TB
+    M[0 0 0 0<br>0 1 1 1<br>0 1 1 1<br>0 1 1 2]
+    end
+    
+    Diagonal["If A[i] == B[j]: dp[i][j] = 1 + dp[i-1][j-1]"]
+    Straight["Else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])"]
+    
+    style Matrix_LCS fill:#eee
+```
 
-### DP vs. Greedy
-- **Greedy**: Makes the best local choice at each step (doesn't look back).
-- **DP**: Considers all possible choices to find the global optimum.
-- *Rule of Thumb*: If "taking the biggest" or "taking the smallest" works, it's Greedy. If you need to "try all combinations", it's DP.
+---
 
-### Why Bottom-Up is often better
-While Memoization is more intuitive, Tabulation (Bottom-Up) avoids **Recursion Depth** limits (StackOverflowError) and is often slightly faster due to iterative performance.
+## 4. Advanced Sub-Topics
+
+### Bitmask DP
+Using a bitmask to represent a "set" of used items.
+- **Complexity**: $O(2^n \cdot n)$.
+- **Use Case**: Traveling Salesperson Problem (TSP).
+
+### Interval DP
+Solving subproblems defined by a range $[i, j]$.
+- **Complexity**: $O(n^3)$.
+- **Use Case**: Matrix Chain Multiplication, Burst Balloons.
+
+---
+
+## 5. Developer Cheat Sheet
+
+| DP Pattern | Strategy | Example Problem |
+| :--- | :--- | :--- |
+| **0/1 Knapsack** | Pick / Don't Pick | Target Sum |
+| **Unbounded Knapsack**| Infinite Supply | Coin Change |
+| **Grid DP** | Move Right/Down | Unique Paths |
+| **String DP** | Match / No Match | Edit Distance |
+
+### Critical Patterns
+- **Identify Substructure**: Does the answer to $n$ depend on $n-1, n-2, \dots$?
+- **Iterative > Recursive**: Avoid recursion depth limits and stack overhead.
+- **Base Cases**: Always define $dp[0]$ or $dp[0][0]$ first.

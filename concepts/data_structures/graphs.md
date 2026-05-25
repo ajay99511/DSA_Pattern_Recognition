@@ -1,96 +1,102 @@
-# Graphs & Disjoint Set Union (DSU)
+# Graphs & Disjoint Set Union: The Web of Data
 
-## 1. Graph Fundamentals
+## 1. Graph Storage: Matrix vs. List
 
-### Conceptual Overview
-A **Graph** is a non-linear data structure consisting of **Vertices** (nodes) and **Edges** (connections). Graphs can represent social networks, maps, internet routing, and more.
+### Schematic: Memory Profile Comparison
+How we store a graph determines the efficiency of our algorithms.
 
-### Types of Graphs
-- **Directed vs. Undirected**: Edges have a direction or are bidirectional.
-- **Weighted vs. Unweighted**: Edges have a cost/weight or are equal.
-- **Cyclic vs. Acyclic**: Whether you can return to a node by following edges.
-
-### Visual Representation
 ```mermaid
 graph LR
-    A((A)) --- B((B))
-    B --- C((C))
-    C --- D((D))
-    D --- A
-    A --- C
+    subgraph Adjacency_Matrix [Memory: O(V²)]
+    direction TB
+    M[0 1 0<br>1 0 1<br>0 1 0]
+    end
     
-    style A fill:#f9f,stroke:#333
-    style C fill:#f9f,stroke:#333
+    subgraph Adjacency_List [Memory: O(V+E)]
+    direction TB
+    L0[Node 0] --> L1[1]
+    L1_Node[Node 1] --> L01[0] --> L2[2]
+    L2_Node[Node 2] --> L12[1]
+    end
+    
+    style Adjacency_Matrix fill:#fdd
+    style Adjacency_List fill:#dfd
 ```
 
----
-
-## 2. Graph Representations
-
-### Adjacency Matrix
-A 2D array where `matrix[i][j] = 1` if there's an edge from $i$ to $j$.
-- **Space**: O(V²)
-- **Check Edge**: O(1)
-- **Best for**: Dense graphs.
-
-### Adjacency List (Developer Favorite)
-An array of lists. `list[i]` contains all neighbors of node $i$.
-- **Space**: O(V + E)
-- **Find Neighbors**: O(degree(V))
-- **Best for**: Sparse graphs (most real-world scenarios).
+| Method | Space | Edge Check | Find Neighbors |
+| :--- | :--- | :--- | :--- |
+| **Matrix** | $O(V^2)$ | **O(1)** | $O(V)$ |
+| **List** | **O(V+E)** | $O(deg(V))$ | **O(deg(V))** |
 
 ---
 
-## 3. Disjoint Set Union (DSU / Union-Find)
+## 2. Disjoint Set Union (DSU) Optimizations
 
-### Conceptual Overview
-DSU is a data structure that keeps track of elements partitioned into a number of disjoint (non-overlapping) sets. It provides two near-constant time operations:
-1. **Find**: Determine which set an element belongs to.
-2. **Union**: Join two sets into a single set.
+### Schematic: Union by Rank (Keep it Shallow)
+Instead of arbitrary joining, we attach the shorter tree to the root of the taller one.
 
-**Analogy**: Think of "friend circles". Initially, everyone is their own circle. When two people become friends, their entire circles merge.
-
-### Visual Representation
 ```mermaid
 graph TD
-    subgraph Set 1
-    R1((1)) --> C2((2))
-    R1 --> C3((3))
+    subgraph Union_by_Rank
+    R1((Rank 2)) --> C1((A))
+    R2((Rank 1)) --> C2((B))
+    
+    Logic[Join B to A]
+    
+    R1_Final((Rank 2)) --> C1_Final((A))
+    R1_Final --> R2_Final((B))
     end
-    subgraph Set 2
-    R4((4)) --> C5((5))
+    
+    Logic -.-> R1_Final
+    style R1_Final fill:#6f9
+```
+
+### Schematic: Path Compression (Flattening)
+During a `find` operation, we point every node along the path directly to the root.
+
+```mermaid
+graph TD
+    subgraph Before_Compression
+    A((Root)) --> B((B)) --> C((C)) --> D((D))
     end
-    Set1 -.-> Union[Union 1 and 4] -.-> Result
-    subgraph Result
-    RR1((1)) --> CC2((2))
-    RR1 --> CC3((3))
-    RR1 --> RR4((4))
-    RR4 --> CC5((5))
+    
+    subgraph After_Compression
+    A1((Root)) --> B1((B))
+    A11((Root)) --> C1((C))
+    A111((Root)) --> D1((D))
     end
+    
+    D -.-> Find_A[Find Root of D] -.-> After_Compression
+    
+    style After_Compression fill:#dfd
 ```
 
 ---
 
-## 4. Key Properties & Optimizations (DSU)
+## 3. Advanced Sub-Topics
 
-### Path Compression (Find Optimization)
-During `find(x)`, we make every node in the path point directly to the root. This flattens the tree.
+### Bipartite Graphs
+A graph where vertices can be divided into two independent sets $U$ and $V$ such that every edge connects a vertex in $U$ to one in $V$. (Can be checked using **BFS Coloring**).
 
-### Union by Rank/Size (Union Optimization)
-Always attach the smaller tree under the root of the larger tree. This keeps the tree height minimal.
+### Strongly Connected Components (SCC)
+In a directed graph, an SCC is a portion where every vertex is reachable from every other vertex in that portion.
+- **Algorithm**: Tarjan's or Kosaraju's.
 
-**Complexity**: With both optimizations, operations are almost constant time: **O(α(n))**, where α is the inverse Ackermann function (extremely slow-growing, effectively < 5 for any practical $n$).
+### Euler Path vs. Hamiltonian Path
+- **Euler**: Visit every **edge** exactly once. (O(E) check).
+- **Hamiltonian**: Visit every **vertex** exactly once. (NP-Complete).
 
 ---
 
-## 5. Developer Tips & Common Patterns
+## 4. Developer Cheat Sheet
 
-### Adjacency List with HashMaps
-For nodes that aren't 0-indexed integers (e.g., strings), use `Map<String, List<String>>`.
+| Feature | DFS | BFS | DSU |
+| :--- | :--- | :--- | :--- |
+| **Use Case** | Cycles, Paths | Shortest Path | Connectivity |
+| **Data Struct** | Stack/Recursion | Queue | Array (Parent Map) |
+| **Complexity** | O(V+E) | O(V+E) | O(α(N)) |
 
-### Implicit Graphs
-Many problems (like Word Ladder or Matrix problems) are "implicit graphs". You don't build the graph; you treat the state transitions or matrix cells as nodes.
-
-### Cycle Detection
-- **Undirected**: Use BFS/DFS (check if neighbor is already visited and not the parent) or DSU (if `find(u) == find(v)` before union).
-- **Directed**: Use DFS with a "recursion stack" or Kahn's Algorithm (Topological Sort).
+### Critical Patterns
+- **Topological Sort**: Ordering tasks with dependencies.
+- **Cycle Detection**: Using "Visited" and "Recursion Stack".
+- **Number of Islands**: BFS/DFS in a 2D matrix.

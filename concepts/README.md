@@ -1,42 +1,38 @@
-# DSA Mastery: Conceptual Roadmap
+# DSA Mastery: The Schematic Knowledge Base
 
-Welcome to the **Concepts** library. This folder contains high-quality, developer-focused knowledge on Data Structures and Algorithms.
+Welcome to the **Concepts** library. This is not just a collection of notes; it is a **high-fidelity architectural guide** to Data Structures and Algorithms, designed for senior engineers and developers.
 
-## How to navigate this library
-
-### 1. Data Structures (The "Tools")
-Start here to understand how data is organized in memory.
-- [Arrays & Hashing](./data_structures/arrays_and_hashing.md) - The foundation of O(1) access and lookup.
-- [Linked Lists](./data_structures/linked_lists.md) - Dynamic memory and pointer basics.
-- [Stacks & Queues](./data_structures/stacks_and_queues.md) - LIFO and FIFO principles.
-- [Trees & Tries](./data_structures/trees_and_tries.md) - Hierarchical data and prefix searching.
-- [Graphs & DSU](./data_structures/graphs.md) - Relationship modeling and connectivity.
-
-### 2. Algorithms (The "Methods")
-Learn the techniques used to manipulate the data structures.
-- [Sorting & Searching](./algorithms/sorting_and_searching.md) - Organizing and finding data efficiently.
-- [Graph Algorithms](./algorithms/graph_algorithms.md) - BFS, DFS, and shortest paths.
-- [Dynamic Programming](./algorithms/dynamic_programming.md) - The art of solving subproblems.
-- [Backtracking & Greedy](./algorithms/backtracking_and_greedy.md) - Exhaustive search vs. local optimization.
-- [Advanced Topics](./advanced_topics.md) - Bit manipulation, Math, and Geometry.
+## The "Schematic" Standard
+Every document in this library follows the **Schematic Standard**:
+- **Visual-First**: Complex logic is represented using advanced Mermaid diagrams (subgraphs, styling, directional logic).
+- **Physical Reality**: We explain how data sits in **RAM**, affects the **CPU Cache**, and impacts **Stack vs Heap** memory.
+- **End-to-End**: Every sub-topic is covered, from basic definitions to advanced optimizations (e.g., Path Compression, Lazy Propagation).
 
 ---
 
-## The "Visual" Philosophy
-Each concept includes **Mermaid diagrams** that represent the internal state and flow. To see them rendered:
-1. Use a Markdown viewer with Mermaid support (VS Code, GitHub, etc.).
-2. Focus on the "transitions" in the diagrams—they represent the execution of the algorithm.
+## 1. Data Structures (The Architecture)
+- [Arrays & Hashing](./data_structures/arrays_and_hashing.md) - Cache locality, dynamic resizing, and collision schematics.
+- [Linked Lists](./data_structures/linked_lists.md) - Reversal logic and Fast/Slow pointers.
+- [Stacks & Queues](./data_structures/stacks_and_queues.md) - Circular buffers and Monotonic stacks.
+- [Trees & Tries](./data_structures/trees_and_tries.md) - AVL rotations, Heapify, and Prefix trees.
+- [Advanced Trees](./data_structures/advanced_trees.md) - Segment Trees, BIT, and Lazy Propagation.
+- [Graphs & DSU](./data_structures/graphs.md) - Union-by-rank and Path compression schematics.
 
-## Quality Standards
-- **Practicality over Pure Theory**: We focus on cache locality, memory overhead, and language-specific implementations (e.g., Timsort).
-- **Time/Space Complexity**: Always provided with Average and Worst-case scenarios.
-- **Developer Tips**: Real-world nuances that you won't find in basic textbooks.
+## 2. Algorithms (The Logic)
+- [Sorting & Searching](./algorithms/sorting_and_searching.md) - Partitioning schematics and Stability analysis.
+- [Graph Algorithms](./algorithms/graph_algorithms.md) - Shortest paths (Dijkstra/Bellman-Ford) and MSTs.
+- [Dynamic Programming](./algorithms/dynamic_programming.md) - State transitions and space optimization schematics.
+- [Backtracking & Greedy](./algorithms/backtracking_and_greedy.md) - Choice trees and local vs. global optimization.
+- [String Algorithms](./advanced_topics/string_algorithms.md) - KMP, Rabin-Karp, and Rolling Hashes.
+
+## 3. Algorithmic Patterns (The Strategy)
+Common templates used to solve 90% of technical problems.
+- [Sliding Window](./patterns/sliding_window.md) - Fixed vs. Dynamic windows and Deque optimizations.
+- [Two Pointers](./patterns/two_pointers.md) - Convergence, Fast/Slow, and multi-array strategies.
 
 ---
 
-## Recommended Learning Path
-1. **Foundations**: Complexity Analysis -> Arrays -> Hashing.
-2. **Linear Structures**: Linked Lists -> Stacks -> Queues.
-3. **Non-Linear**: Trees -> Heaps -> Graphs.
-4. **Techniques**: Recursion -> Sorting -> Sliding Window -> Two Pointers.
-5. **Advanced**: DP -> Backtracking -> Bitmasking.
+## Technical Standards
+- **Practicality**: We prioritize language-native implementations (e.g., `ArrayDeque`, `dict` resizing).
+- **Complexity**: $O(1)$, $O(\log n)$, $O(n)$, and $O(n \log n)$ are visualized to show the performance "elbow".
+- **Visual Rendering**: These documents are best viewed in **VS Code**, **GitHub**, or **Notion** to see the Mermaid diagrams render as images.
